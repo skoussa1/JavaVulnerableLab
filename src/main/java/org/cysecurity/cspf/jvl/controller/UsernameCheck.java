@@ -92,7 +92,35 @@ public class UsernameCheck extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+     response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+        try {
+               Connection con=new DBConnect().connect(getServletContext().getRealPath("/WEB-INF/config.properties"));
+               String user=request.getParameter("username").trim();
+               JSONObject json=new JSONObject();
+                if(con!=null && !con.isClosed())
+                {
+                    ResultSet rs=null;
+                    Statement stmt = con.createStatement();  
+                    rs=stmt.executeQuery("select * from users where username='"+user+"'");
+                    if (rs.next()) 
+                    {  
+                     json.put("available", "1"); 
+                    }  
+                    else
+                    {  
+                      json.put("available", new Integer(0));  
+                    }  
+                }
+                out.print(json);
+        } 
+        catch(Exception e)
+        {
+            out.print(e);
+        }
+        finally {
+            out.close();
+        }    
     }
 
     /**
